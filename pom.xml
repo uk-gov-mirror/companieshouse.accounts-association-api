@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.14</version>
+        <version>2.1.20</version>
         <relativePath/>
     </parent>
     <artifactId>accounts-association-api</artifactId>
@@ -14,26 +14,22 @@
     <description>User and Company association.</description>
     <properties>
         <java.version>21</java.version>
-        <spring-boot.version>4.1.0</spring-boot.version>
+        <spring-boot.version>4.1.1</spring-boot.version>
 
         <!-- CH dependencies -->
-        <ch-boms.version>0.1.16</ch-boms.version>
+        <ch-boms.version>0.1.21</ch-boms.version>
         <private-api-sdk-java.version>7.2.7</private-api-sdk-java.version>
         <!-- although this is in ch-boms - needed here for the annotation processor path in the maven-compiler-plugin -->
         <mapstruct.version>1.6.3</mapstruct.version>
 
-        <!-- ch-core-bom (imported via ch-dependency-bom) pins tomcat.version to 10.1.57 for
-             services on Spring Boot 3, but Spring Boot 4.1.0 manages Tomcat 11.0.22
-             (Jakarta Servlet 6.1) itself. Without this override, the CH bom's older pin wins
-             and silently downgrades Tomcat below what Spring Boot 4 expects. Override here to
-             the latest patched Tomcat 11.x line until ch-boms tracks Spring Boot major version
-             (see ch-ai-dev spring-boot-4-migration skill / ch-core-bom follow-up). -->
-        <tomcat.version>11.0.24</tomcat.version>
+        <!-- OpenTelemetry (native Spring Boot 4 starter, replacing the legacy
+             opentelemetry-spring-boot-starter agent, which does not carry over to
+             Spring Boot 4 / Spring Framework 7 - see ch-ai-dev spring-boot-4-migration skill,
+             opentelemetry-spring-boot-starter-migration.md). -->
+        <opentelemetry.version>2.31.1</opentelemetry.version>
+        <opentelemetry.logback.appender.version>2.31.1-alpha</opentelemetry.logback.appender.version>
 
         <!-- Maven Plugins -->
-        <maven.compiler.release>${java.version}</maven.compiler.release>
-        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <jib-maven-plugin.version>3.4.0</jib-maven-plugin.version>
     </properties>
     <dependencyManagement>
@@ -59,35 +55,29 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-            <!-- ch-core-bom (imported transitively via ch-dependency-bom) pins tomcat.version
-                 to 10.1.57, which is correct for Spring Boot 3 services but downgrades Tomcat
-                 below what Spring Boot 4.1.0 itself manages (11.0.22, Jakarta Servlet 6.1).
-                 Override explicitly here to the latest patched Tomcat 11.x release until
-                 ch-boms tracks Spring Boot major version (see ch-ai-dev
-                 spring-boot-4-migration skill / ch-core-bom follow-up). -->
+            <!-- ch-dependency-bom 0.1.21 (via ch-core-bom) now pins tomcat.version to 11.0.25,
+                 tracking Spring Boot 4's Tomcat 11.x line correctly - no local override needed
+                 (see ch-ai-dev spring-boot-4-migration skill / ch-core-bom follow-up, now resolved). -->
             <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
-                <version>${tomcat.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-websocket</artifactId>
-                <version>${tomcat.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-el</artifactId>
-                <version>${tomcat.version}</version>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-bom</artifactId>
+                <version>${opentelemetry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-opentelemetry</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-spring-boot-starter</artifactId>
+            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+            <version>${opentelemetry.logback.appender.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -228,21 +218,21 @@
                     </container>
                 </configuration>
             </plugin>
+            <!-- version now managed by companies-house-parent's pluginManagement -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
+            <!-- version and release are managed by companies-house-parent's pluginManagement;
+                 only the mapstruct annotation processor path is added locally -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <release>${maven.compiler.release}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.mapstruct</groupId>

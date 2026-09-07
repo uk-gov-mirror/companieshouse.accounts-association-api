@@ -190,6 +190,15 @@ Service should do any business or database checks. If a resource request is not 
 
 A business validation error will throw an exception that will be handled in the application ControllerAdvice class and a HTTP Bad request is returned with an Errors object from the CH standard Errors class.
 
+## OpenTelemetry Configuration
+
+The service exports logs, traces, and metrics via OpenTelemetry when enabled. This is controlled by the following environment variables:
+
+| Variable | Description | Default |
+|---|---|---|
+| `OTEL_LOG_ENABLED` | Enables OpenTelemetry log/trace/metric export when `true`. | `false` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Base URL of the OTLP collector (`/v1/logs`, `/v1/traces`, `/v1/metrics` are appended automatically). | `http://otel-collector:4318` |
+
 ## Getting Started with Docker
 To set up and build the service using Docker, follow these steps:
 
