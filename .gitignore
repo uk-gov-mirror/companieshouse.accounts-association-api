@@ -49,3 +49,6 @@ bin/
 spec/
 
 /target
+
+# My AI docs
+docs/ai/
