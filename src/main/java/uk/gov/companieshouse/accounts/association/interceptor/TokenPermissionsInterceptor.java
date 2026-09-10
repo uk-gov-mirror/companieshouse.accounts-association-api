@@ -23,11 +23,11 @@ public class TokenPermissionsInterceptor implements HandlerInterceptor {
 
     private boolean isReauthenticationEndpoint( final HttpServletRequest request ) {
         final var method = request.getMethod();
-        return "POST".equalsIgnoreCase( method ) || "PATCH".equalsIgnoreCase( method );
+        return "PATCH".equalsIgnoreCase( method );
     }
 
     private Optional<Instant> parseCompanyUpgradedAuthValidUntil( final String tokenPermissions ) {
-        final var pattern = Pattern.compile( COMPANY_UPGRADED_AUTH_VALID_UNTIL + "\\s*[:=]\\s*\"?([^\",;\\s}]+)\"?" );
+        final var pattern = Pattern.compile( COMPANY_UPGRADED_AUTH_VALID_UNTIL + "\\s*=\\s*([^\\s]+)" );
         final var matcher = pattern.matcher( tokenPermissions );
         if ( !matcher.find() ) {
             return Optional.empty();
@@ -39,9 +39,16 @@ public class TokenPermissionsInterceptor implements HandlerInterceptor {
         }
 
         try {
+            // Try ISO-8601 format first
             return Optional.of( Instant.parse( expiryTime ) );
         } catch ( DateTimeParseException ignored ) {
-            return Optional.empty();
+            // Fall back to Unix timestamp (seconds since epoch)
+            try {
+                final var unixSeconds = Long.parseLong( expiryTime );
+                return Optional.of( Instant.ofEpochSecond( unixSeconds ) );
+            } catch ( NumberFormatException numberIgnored ) {
+                return Optional.empty();
+            }
         }
     }
 

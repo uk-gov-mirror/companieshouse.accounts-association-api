@@ -21,7 +21,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors( final InterceptorRegistry registry ) {
         registry.addInterceptor( tokenPermissionsInterceptor )
-                .addPathPatterns( "/associations", "/associations/*" );
+                .addPathPatterns( "/associations/*" );
         registry.addInterceptor( new RequestLifecycleInterceptor( usersService ) );
     }
 

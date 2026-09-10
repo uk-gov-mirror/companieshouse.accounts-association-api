@@ -16,12 +16,13 @@ class TokenPermissionsInterceptorTest {
 
     private final TokenPermissionsInterceptor tokenPermissionsInterceptor = new TokenPermissionsInterceptor();
 
+
     @Test
-    void preHandleWithPostAssociationsAndMissingTokenPermissionReturnsForbidden() {
+    void preHandleWithPatchAssociationsAndMissingTokenPermissionReturnsForbidden() {
         final var request = new MockHttpServletRequest();
         request.addHeader( "X-Request-Id", "theId123" );
-        request.setMethod( "POST" );
-        request.setRequestURI( "/associations" );
+        request.setMethod( "PATCH" );
+        request.setRequestURI( "/associations/abc123" );
 
         final var response = new MockHttpServletResponse();
 
@@ -49,13 +50,13 @@ class TokenPermissionsInterceptorTest {
     }
 
     @Test
-    void preHandleWithPostAssociationsAndExpiredTokenPermissionReturnsForbidden() {
+    void preHandleWithPatchAssociationsAndExpiredTokenPermissionReturnsForbidden() {
         final var request = new MockHttpServletRequest();
         request.addHeader( "X-Request-Id", "theId123" );
         request.addHeader( ERIC_AUTHORISED_TOKEN_PERMISSIONS,
                 COMPANY_UPGRADED_AUTH_VALID_UNTIL + "=2000-01-01T00:00:00Z" );
-        request.setMethod( "POST" );
-        request.setRequestURI( "/associations" );
+        request.setMethod( "PATCH" );
+        request.setRequestURI( "/associations/abc123" );
 
         final var response = new MockHttpServletResponse();
 
@@ -70,6 +71,27 @@ class TokenPermissionsInterceptorTest {
         final var request = new MockHttpServletRequest();
         request.setMethod( "GET" );
         request.setRequestURI( "/associations" );
+
+        final var response = new MockHttpServletResponse();
+
+        final var result = tokenPermissionsInterceptor.preHandle( request, response, new Object() );
+
+        assertTrue( result );
+        assertEquals( 200, response.getStatus() );
+    }
+
+    @Test
+    void preHandleWithPatchAssociationsAndUnixTimestampTokenPermissionReturnsTrue() {
+        final var request = new MockHttpServletRequest();
+        request.addHeader( "X-Request-Id", "theId123" );
+        // Unix timestamp for year 2999 (far future)
+        final var futureUnixTime = "32503680000";
+        request.addHeader( ERIC_AUTHORISED_TOKEN_PERMISSIONS,
+                "acsp_associations=read company_incorporation=create " +
+                COMPANY_UPGRADED_AUTH_VALID_UNTIL + "=" + futureUnixTime +
+                " user_applications=create,read" );
+        request.setMethod( "PATCH" );
+        request.setRequestURI( "/associations/abc123" );
 
         final var response = new MockHttpServletResponse();
 
