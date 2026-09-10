@@ -78,6 +78,9 @@ import static uk.gov.companieshouse.api.accounts.associations.model.PreviousStat
 @Tag( "unit-test" )
 class UserCompanyAssociationTest {
 
+    private static final String ERIC_AUTHORISED_TOKEN_PERMISSIONS = "ERIC-Authorised-Token-Permissions";
+    private static final String FUTURE_TOKEN_PERMISSIONS = "company_upgraded_auth_valid_until=32503680000";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -119,6 +122,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isNotFound());
     }
@@ -140,6 +144,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isNotFound());
     }
@@ -155,6 +160,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, ERIC_ID_VALUE)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isOk());
         final var result = parseResponseTo( response, Association.class );
@@ -209,6 +215,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "111")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header( "Eric-Authorised-Roles", ADMIN_READ_PERMISSION ) )
                 .andExpect( status().isOk() );
     }
@@ -226,6 +233,7 @@ class UserCompanyAssociationTest {
                                 .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                                 .header(ERIC_IDENTITY, "111")
                                 .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                                 .header( "Eric-Authorised-Roles", ADMIN_READ_PERMISSION ) )
                         .andExpect( status().isOk() );
 
@@ -241,6 +249,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "111")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isBadRequest());
     }
@@ -251,6 +260,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "111")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isBadRequest());
     }
@@ -261,6 +271,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isBadRequest());
     }
@@ -273,6 +284,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isNotFound());
     }
@@ -287,6 +299,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isOk());
         final var resultInvitationsList = parseResponseTo( response, InvitationsList.class );
@@ -317,6 +330,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, ERIC_ID_VALUE)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE))
                 .andExpect(status().isOk());
         final var invitationsList = parseResponseTo( response, InvitationsList.class );
@@ -355,7 +369,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"removed\"}"))
                 .andExpect(status().isBadRequest());
@@ -367,7 +383,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -378,7 +396,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
@@ -390,7 +410,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"complicated\"}"))
                 .andExpect(status().isBadRequest());
@@ -405,7 +427,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, ERIC_ID_VALUE)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"confirmed\"}"))
                 .andExpect(status().isNotFound());
@@ -427,7 +451,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, ERIC_ID_VALUE)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"removed\"}"))
                 .andExpect(status().isOk());
@@ -447,7 +473,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, ERIC_ID_VALUE)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"confirmed\"}"))
                 .andExpect(status().isBadRequest());
@@ -465,7 +493,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"confirmed\"}"))
                 .andExpect(status().isOk());
@@ -486,7 +516,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"removed\"}"))
                 .andExpect(status().isOk());
@@ -507,7 +539,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "000")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"removed\"}"))
                 .andExpect(status().isOk());
@@ -533,7 +567,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, ERIC_ID_VALUE)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
                 .andExpect( status().isOk() );
@@ -559,7 +595,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "111")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
                 .andExpect( status().isOk() );
@@ -585,7 +623,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "111")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
                 .andExpect( status().isOk() );
@@ -611,7 +651,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "333")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
                 .andExpect( status().isOk() );
@@ -635,7 +677,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "666")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"confirmed\"}" ) )
                 .andExpect( status().isOk() );
@@ -657,7 +701,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "222")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"confirmed\"}" ) )
                 .andExpect( status().isBadRequest() );
@@ -679,7 +725,9 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "9999")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"confirmed\"}" ) )
                 .andExpect( status().isOk() );
@@ -705,6 +753,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "222")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
@@ -729,6 +778,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "9999")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
@@ -773,6 +823,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, requestingUserId)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( String.format( "{\"status\":\"%s\"}", newStatus ) ) )
                 .andExpect( expectedOutcome );
@@ -796,6 +847,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "9999")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header( "Eric-Authorised-Roles", ADMIN_UPDATE_PERMISSION )
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
@@ -822,6 +874,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "9999")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header( "Eric-Authorised-Roles", ADMIN_UPDATE_PERMISSION )
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
@@ -849,6 +902,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "MKUser002")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
                 .andExpect( status().isOk() );
@@ -874,6 +928,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, MK_USER_001)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"removed\"}" ) )
                 .andExpect( status().isOk() );
@@ -899,6 +954,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "MKUser002")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"confirmed\"}" ) )
                 .andExpect( status().isOk() );
@@ -924,6 +980,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "MKUser002")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"confirmed\"}" ) )
                 .andExpect( status().isOk() );
@@ -1025,6 +1082,7 @@ class UserCompanyAssociationTest {
                         .header(ERIC_IDENTITY, "9999")
                         .header(ERIC_IDENTITY_TYPE, "key")
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"unauthorised\"}" ) )
                 .andExpect( status().isOk() );
@@ -1055,6 +1113,7 @@ class UserCompanyAssociationTest {
                         .header(ERIC_IDENTITY, "9999")
                         .header(ERIC_IDENTITY_TYPE, "key")
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( String.format( "{\"status\":\"%s\"}", status ) ) )
                 .andExpect( status().isBadRequest() );
@@ -1084,6 +1143,7 @@ class UserCompanyAssociationTest {
                         .header(ERIC_IDENTITY, "9999")
                         .header(ERIC_IDENTITY_TYPE, "key")
                         .header(ERIC_AUTHORISED_KEY_ROLES, KEY_ROLES_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"confirmed\"}" ) )
                 .andExpect( status().isOk() );
@@ -1112,6 +1172,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "MKUser004")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( String.format( "{\"status\":\"%s\"}", status ) ) )
                 .andExpect( status().isBadRequest() );
@@ -1132,6 +1193,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "MKUser002")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"confirmed\"}" ) )
                 .andExpect( status().isOk() );
@@ -1153,6 +1215,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "MKUser002")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( "{\"status\":\"unauthorised\"}" ) )
                 .andExpect( status().isBadRequest() );
@@ -1205,7 +1268,9 @@ class UserCompanyAssociationTest {
         mockMvc.perform( get( uri )
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2))
+
                 .andExpect( status().isBadRequest() );
     }
 
@@ -1238,6 +1303,7 @@ class UserCompanyAssociationTest {
                         .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY, "111")
                         .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header( "Eric-Authorised-Roles", ADMIN_READ_PERMISSION ) )
                 .andExpect( status().isOk() );
     }
