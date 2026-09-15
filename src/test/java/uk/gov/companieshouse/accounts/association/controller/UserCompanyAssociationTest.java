@@ -40,7 +40,6 @@ import uk.gov.companieshouse.api.accounts.associations.model.PreviousStatesList;
 import uk.gov.companieshouse.api.accounts.user.model.User;
 
 import java.time.LocalDateTime;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -1546,7 +1545,6 @@ class UserCompanyAssociationTest {
     void updateAssociationStatusForIdWithCompanyUpgradedAuthTokenPermissionAdminCanRemoveUser() throws Exception {
         final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
         final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
-        final var adminUser = testDataManager.fetchUserDtos( "9999" ).getFirst();
 
         mockers.mockUsersServiceFetchUserDetails( "9999" );
         mockers.mockCompanyServiceFetchCompanyProfile( "MKCOMP001" );
