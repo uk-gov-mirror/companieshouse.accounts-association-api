@@ -40,6 +40,7 @@ import uk.gov.companieshouse.api.accounts.associations.model.PreviousStatesList;
 import uk.gov.companieshouse.api.accounts.user.model.User;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -80,6 +81,12 @@ class UserCompanyAssociationTest {
 
     private static final String ERIC_AUTHORISED_TOKEN_PERMISSIONS = "ERIC-Authorised-Token-Permissions";
     private static final String FUTURE_TOKEN_PERMISSIONS = "company_upgraded_auth_valid_until=32503680000";
+    private static final String EXPIRED_TOKEN_PERMISSIONS = "company_upgraded_auth_valid_until=1000000000";
+    private static final String ISO_8601_FUTURE_TOKEN_PERMISSIONS = "company_upgraded_auth_valid_until=2099-12-31T23:59:59Z";
+    private static final String MALFORMED_TOKEN_PERMISSIONS = "company_upgraded_auth_valid_until=invalid_date";
+    private static final String MISSING_VALUE_TOKEN_PERMISSIONS = "company_upgraded_auth_valid_until=";
+    private static final String BLANK_VALUE_TOKEN_PERMISSIONS = "company_upgraded_auth_valid_until= ";
+    private static final String MISSING_KEY_TOKEN_PERMISSIONS = "some_other_key=value";
 
     @Autowired
     private MockMvc mockMvc;
@@ -1306,6 +1313,308 @@ class UserCompanyAssociationTest {
                         .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
                         .header( "Eric-Authorised-Roles", ADMIN_READ_PERMISSION ) )
                 .andExpect( status().isOk() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithCompanyUpgradedAuthTokenPermissionAndConfirmedStatusSucceeds() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        mockers.mockCompanyServiceFetchCompanyProfile( "MKCOMP001" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+        Mockito.doReturn( true ).when( associationsService ).confirmedAssociationExists( "MKCOMP001", "MKUser002" );
+        Mockito.doReturn( sendEmailMock ).when( emailService ).sendInvitationEmailToAssociatedUser( any(), any(), any(), any(), any() );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( status().isOk() );
+
+        Mockito.verify( associationsService ).updateAssociation( eq( association.getId() ), any( Update.class ) );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithExpiredCompanyUpgradedAuthTokenPermissionReturnsUnauthorised() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, EXPIRED_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( status().isUnauthorized() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithMalformedTokenPermissionReturnsUnauthorised() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, MALFORMED_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( status().isUnauthorized() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithMissingValueTokenPermissionReturnsUnauthorised() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, MISSING_VALUE_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( status().isUnauthorized() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithBlankValueTokenPermissionReturnsUnauthorised() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, BLANK_VALUE_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( status().isUnauthorized() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithMissingTokenPermissionKeyReturnsUnauthorised() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, MISSING_KEY_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( status().isUnauthorized() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithISO8601TokenPermissionSucceeds() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        mockers.mockCompanyServiceFetchCompanyProfile( "MKCOMP001" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+        Mockito.doReturn( true ).when( associationsService ).confirmedAssociationExists( "MKCOMP001", "MKUser002" );
+        Mockito.doReturn( sendEmailMock ).when( emailService ).sendInvitationEmailToAssociatedUser( any(), any(), any(), any(), any() );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, ISO_8601_FUTURE_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( status().isOk() );
+
+        Mockito.verify( associationsService ).updateAssociation( eq( association.getId() ), any( Update.class ) );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithValidTokenPermissionButNoConfirmedAssociationReturnsBadRequest() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+        Mockito.doReturn( false ).when( associationsService ).confirmedAssociationExists( "MKCOMP001", "MKUser002" );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( status().isBadRequest() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithCompanyUpgradedAuthTokenPermissionAndRemovedStatusSucceeds() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        mockers.mockCompanyServiceFetchCompanyProfile( "MKCOMP001" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+        Mockito.doReturn( true ).when( associationsService ).confirmedAssociationExists( "MKCOMP001", "MKUser002" );
+        Mockito.doReturn(Mono.empty()).when(emailService).sendAuthorisationRemovedEmailToRemovedUser(any(), any(), any(), any(), any());
+        Mockito.doReturn(sendEmailMock).when(emailService).sendAuthorisationRemovedEmailToAssociatedUser(any(), any(), any(), any(), any());
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"removed\"}" ) )
+                .andExpect( status().isOk() );
+
+        Mockito.verify( associationsService ).updateAssociation( eq( association.getId() ), any( Update.class ) );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithCompanyUpgradedAuthTokenPermissionAndRemovedStatusWithoutConfirmedAssociationReturnsBadRequest() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+        Mockito.doReturn( false ).when( associationsService ).confirmedAssociationExists( "MKCOMP001", "MKUser002" );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"removed\"}" ) )
+                .andExpect( status().isBadRequest() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithCompanyUpgradedAuthTokenPermissionAndUnauthorisedStatusReturnsBadRequest() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"unauthorised\"}" ) )
+                .andExpect( status().isBadRequest() );
+    }
+
+    @Test
+    void updateAssociationStatusForIdWithCompanyUpgradedAuthTokenPermissionAdminCanRemoveUser() throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+        final var adminUser = testDataManager.fetchUserDtos( "9999" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "9999" );
+        mockers.mockCompanyServiceFetchCompanyProfile( "MKCOMP001" );
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+        Mockito.doReturn( false ).when( associationsService ).confirmedAssociationExists( "MKCOMP001", "9999" );
+        Mockito.doReturn(Mono.empty()).when(emailService).sendAuthorisationRemovedEmailToRemovedUser(any(), any(), any(), any(), any());
+        Mockito.doReturn(sendEmailMock).when(emailService).sendAuthorisationRemovedEmailToAssociatedUser(any(), any(), any(), any(), any());
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "9999")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, FUTURE_TOKEN_PERMISSIONS)
+                        .header( "Eric-Authorised-Roles", ADMIN_UPDATE_PERMISSION)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"removed\"}" ) )
+                .andExpect( status().isOk() );
+
+        Mockito.verify( associationsService ).updateAssociation( eq( association.getId() ), any( Update.class ) );
+    }
+
+    private static Stream<Arguments> tokenPermissionParsingScenarios(){
+        return Stream.of(
+                // Valid Unix timestamps
+                Arguments.of( "company_upgraded_auth_valid_until=32503680000", true, "Unix timestamp far in future" ),
+                Arguments.of( "company_upgraded_auth_valid_until=2524608000", true, "Unix timestamp in future" ),
+                // Valid ISO-8601 timestamps
+                Arguments.of( "company_upgraded_auth_valid_until=2099-12-31T23:59:59Z", true, "ISO-8601 future timestamp" ),
+                Arguments.of( "company_upgraded_auth_valid_until=2050-01-01T00:00:00Z", true, "ISO-8601 future timestamp 2050" ),
+                // Expired timestamps
+                Arguments.of( "company_upgraded_auth_valid_until=1000000000", false, "Unix timestamp in past" ),
+                Arguments.of( "company_upgraded_auth_valid_until=2000-01-01T00:00:00Z", false, "ISO-8601 past timestamp" ),
+                // Invalid formats (should return false/unauthorized)
+                Arguments.of( "company_upgraded_auth_valid_until=invalid_date", false, "Invalid date format" ),
+                Arguments.of( "company_upgraded_auth_valid_until=", false, "Empty value" ),
+                Arguments.of( "company_upgraded_auth_valid_until= ", false, "Blank value" ),
+                Arguments.of( "some_other_key=32503680000", false, "Missing permission key" ),
+                Arguments.of( "company_upgraded_auth_valid_until", false, "Missing equals sign" ),
+                Arguments.of( "", false, "Empty string" )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource( "tokenPermissionParsingScenarios" )
+    void updateAssociationStatusForIdWithVariousTokenPermissionFormats( final String tokenPermission, final boolean shouldSucceed, final String scenario ) throws Exception {
+        final var association = testDataManager.fetchAssociationDaos( "MKAssociation001" ).getFirst();
+        final var targetUser = testDataManager.fetchUserDtos( "MKUser002" ).getFirst();
+
+        mockers.mockUsersServiceFetchUserDetails( "MKUser002" );
+        if ( shouldSucceed ) {
+            mockers.mockCompanyServiceFetchCompanyProfile( "MKCOMP001" );
+            Mockito.doReturn( true ).when( associationsService ).confirmedAssociationExists( "MKCOMP001", "MKUser002" );
+            Mockito.doReturn( sendEmailMock ).when( emailService ).sendInvitationEmailToAssociatedUser( any(), any(), any(), any(), any() );
+        }
+        Mockito.doReturn( targetUser ).when( usersService ).fetchUserDetails( any( AssociationDao.class ) );
+        Mockito.doReturn( Optional.of( association ) ).when( associationsService ).fetchAssociationDao( "MKAssociation001" );
+
+        final var expectedStatus = shouldSucceed ? status().isOk() : status().isUnauthorized();
+
+        mockMvc.perform(patch(ASSOCIATIONS + "/MKAssociation001")
+                        .header(X_REQUEST_ID, X_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY, "MKUser002")
+                        .header(ERIC_IDENTITY_TYPE, OAUTH_2)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS, tokenPermission)
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( "{\"status\":\"confirmed\"}" ) )
+                .andExpect( expectedStatus );
     }
 
 }

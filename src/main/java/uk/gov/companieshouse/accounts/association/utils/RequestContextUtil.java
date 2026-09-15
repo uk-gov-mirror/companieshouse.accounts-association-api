@@ -31,6 +31,10 @@ public final class RequestContextUtil {
         return getFieldFromRequestContext( RequestContextData::getEricIdentityType, UNKNOWN );
     }
 
+    public static String getEricTokenPermissions(){
+        return getFieldFromRequestContext( RequestContextData::getEricTokenPermissions, UNKNOWN );
+    }
+
     public static boolean hasAdminPrivilege( final String privilege ){
         return getFieldFromRequestContext( RequestContextData::getAdminPrivileges, new HashSet<>() ).contains( privilege );
     }

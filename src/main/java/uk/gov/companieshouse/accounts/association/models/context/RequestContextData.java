@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.accounts.association.models.context;
 
+import static uk.gov.companieshouse.accounts.association.models.Constants.ERIC_AUTHORISED_TOKEN_PERMISSIONS;
 import static uk.gov.companieshouse.accounts.association.models.Constants.UNKNOWN;
 import static uk.gov.companieshouse.accounts.association.models.Constants.X_REQUEST_ID;
 import static uk.gov.companieshouse.api.util.security.EricConstants.ERIC_AUTHORISED_KEY_ROLES;
@@ -21,14 +22,16 @@ public class RequestContextData {
     private final String ericIdentity;
     private final String ericIdentityType;
     private final String ericAuthorisedKeyRoles;
+    private final String ericTokenPermissions;
     private final HashSet<String> adminPrivileges;
     private final User user;
 
-    protected RequestContextData( final String xRequestId, final String ericIdentity, final String ericIdentityType, final String ericAuthorisedKeyRoles, final HashSet<String> adminPrivileges, final User user ){
+    protected RequestContextData(final String xRequestId, final String ericIdentity, final String ericIdentityType, final String ericAuthorisedKeyRoles, String ericTokenPermissions, final HashSet<String> adminPrivileges, final User user ){
         this.xRequestId = xRequestId;
         this.ericIdentity = ericIdentity;
         this.ericIdentityType = ericIdentityType;
         this.ericAuthorisedKeyRoles = ericAuthorisedKeyRoles;
+        this.ericTokenPermissions = ericTokenPermissions;
         this.adminPrivileges = adminPrivileges;
         this.user = user;
     }
@@ -49,6 +52,8 @@ public class RequestContextData {
         return ericAuthorisedKeyRoles;
     }
 
+    public String getEricTokenPermissions(){return ericTokenPermissions;}
+
     public HashSet<String> getAdminPrivileges(){
         return adminPrivileges;
     }
@@ -62,6 +67,7 @@ public class RequestContextData {
         private String ericIdentity = UNKNOWN;
         private String ericIdentityType = UNKNOWN;
         private String ericAuthorisedKeyRoles = UNKNOWN;
+        private String ericTokenPermissions = UNKNOWN;
         private HashSet<String> adminPrivileges = new HashSet<>();
         private User user;
 
@@ -85,6 +91,11 @@ public class RequestContextData {
             return this;
         }
 
+        public RequestContextDataBuilder setEricTokenPermissions( final HttpServletRequest request ){
+            ericTokenPermissions = Optional.ofNullable(getRequestHeader( request, ERIC_AUTHORISED_TOKEN_PERMISSIONS )).orElse( UNKNOWN );
+            return this;
+        }
+
         public RequestContextDataBuilder setAdminPrivileges( final HttpServletRequest request ){
             adminPrivileges = Optional.ofNullable( getRequestHeader( request, ERIC_AUTHORISED_ROLES ) )
                     .map( roles -> roles.split(" ") )
@@ -99,7 +110,7 @@ public class RequestContextData {
         }
 
         public RequestContextData build(){
-            return new RequestContextData( xRequestId, ericIdentity, ericIdentityType, ericAuthorisedKeyRoles, adminPrivileges, user );
+            return new RequestContextData( xRequestId, ericIdentity, ericIdentityType, ericAuthorisedKeyRoles, ericTokenPermissions, adminPrivileges, user );
         }
 
     }
