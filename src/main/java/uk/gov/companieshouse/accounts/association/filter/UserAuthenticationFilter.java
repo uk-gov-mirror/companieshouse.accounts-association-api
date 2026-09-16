@@ -36,6 +36,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
                 .setEricIdentity( request )
                 .setEricIdentityType( request )
                 .setEricAuthorisedKeyRoles( request )
+                .setEricTokenPermissions(request)
                 .setAdminPrivileges( request )
                 .build();
     }

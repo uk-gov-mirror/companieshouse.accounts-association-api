@@ -22,6 +22,7 @@ import uk.gov.companieshouse.accounts.association.exceptions.BadRequestRuntimeEx
 import uk.gov.companieshouse.accounts.association.exceptions.ForbiddenRuntimeException;
 import uk.gov.companieshouse.accounts.association.exceptions.InternalServerErrorRuntimeException;
 import uk.gov.companieshouse.accounts.association.exceptions.NotFoundRuntimeException;
+import uk.gov.companieshouse.accounts.association.exceptions.UnauthorisedRuntimeException;
 import uk.gov.companieshouse.service.rest.err.Errors;
 
 @org.springframework.web.bind.annotation.ControllerAdvice
@@ -62,6 +63,13 @@ public class ControllerAdvice extends ResponseEntityExceptionHandler {
     @ResponseStatus( HttpStatus.FORBIDDEN )
     @ResponseBody
     public Errors onForbiddenRuntimeException( final ForbiddenRuntimeException exception, final HttpServletRequest request ) {
+        return mapThrownExceptionsToErrors( exception, request );
+    }
+
+    @ExceptionHandler( UnauthorisedRuntimeException.class )
+    @ResponseStatus( HttpStatus.UNAUTHORIZED )
+    @ResponseBody
+    public Errors onUnauthorisedRuntimeException( final UnauthorisedRuntimeException exception, final HttpServletRequest request ) {
         return mapThrownExceptionsToErrors( exception, request );
     }
 
